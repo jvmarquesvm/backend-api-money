@@ -29,6 +29,7 @@ public class AppUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
 		Usuario usuario = usuarioOptional.orElseThrow( () -> new UsernameNotFoundException("Usuario e/ou senha incorretos"));
+		//removido para colocar o nome do usuario do jwt token
 		//return new User(email, usuario.getSenha(), getPermissoes(usuario));
 		return new UsuarioSistema(usuario, getPermissoes(usuario));
 	}
