@@ -87,7 +87,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 			.accessTokenValiditySeconds(20) // qual o tempo de validacão do access token
 			.refreshTokenValiditySeconds(3600 * 24); //1 dia de duração - ligado com a instrução no authorization
 		                                // reuseRefreshTokens se tiver pra true - essa duração será obedecida
-			
 	}
 	
 	//Armazenar o token na memória - tokenstore
@@ -98,11 +97,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		
 		endpoints
 			 .authenticationManager(authenticationManager)  // para validar o token
+			 .userDetailsService(userDetailsService)
+			 .tokenEnhancer(tokenEnhancerChain)
 		     //Removido por utilizar o TokenEnhancer
 		     .accessTokenConverter(accessTokenConverter())  // inserido para converter o JWT Token
 			 .tokenStore(tokenStore()) // local onde vai armazenar o token
-		     .userDetailsService(userDetailsService)
-		     //.tokenEnhancer(tokenEnhancerChain)
 		     .reuseRefreshTokens(false);  // configuração para que sempre que pedir, 
 		                                    //  um novo refresh token será enviado(não reaproveitar)
 		                            // Caso contrário, terá o valor da propriedade acima  refreshTokenValiditySeconds
