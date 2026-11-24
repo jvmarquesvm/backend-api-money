@@ -1,6 +1,5 @@
 package com.example.algamoney.api.resource;
 
-import java.net.URI;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
@@ -75,9 +74,12 @@ public class PessoaResource {
 		this.repository.deleteById(codigo);
 	}
 	
+	//Regra para utilizar o PUT - Deve-se enviar todo o objeto, caso contratio os atributos 
+	//não enviados serão atualizados para null
 	@PutMapping( value = "/{codigo}")
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and hasAuthority('SCOPE_write')")
-	public ResponseEntity<Pessoa> atualizar(@PathVariable Long codigo, @Valid @RequestBody(required = true) Pessoa pessoa) {
+	public ResponseEntity<Pessoa> atualizar(@PathVariable Long codigo,
+			                                 @Valid @RequestBody(required = true) Pessoa pessoa) {
 		Pessoa pessoaSalva = this.service.atualizar(codigo, pessoa);
 		return ResponseEntity.ok(pessoaSalva);
 	}
@@ -85,13 +87,15 @@ public class PessoaResource {
 	@PutMapping( value = "/{codigo}/ativo")
 	@ResponseStatus( code = HttpStatus.NO_CONTENT)
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and hasAuthority('SCOPE_write')")
-	public void atualizarPessoaAtivo(@PathVariable Long codigo, @RequestBody(required = true) Boolean ativo) {
+	public void atualizarPessoaAtivo(@PathVariable Long codigo, 
+			                                         @RequestBody(required = true) Boolean ativo) {
 		this.service.atualizarPessoaAtivo(codigo, ativo);
 	}
 	
 	@GetMapping
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA')")
-	public Page<Pessoa> pesquisar(@RequestParam(required = false, defaultValue = "") String nome, Pageable pageable) {
+	public Page<Pessoa> pesquisar(@RequestParam(required = false, defaultValue = "") String nome, 
+			                                                                   Pageable pageable) {
 		return pessoaRepository.findByNomeContaining(nome, pageable);
 	}
 

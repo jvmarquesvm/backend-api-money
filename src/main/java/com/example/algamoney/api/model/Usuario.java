@@ -22,7 +22,7 @@ public class Usuario {
 	
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "usuario_permissao", joinColumns = @JoinColumn(name = "codigo_usuario"), 
-	                                              inverseJoinColumns = @JoinColumn( name = "codigo_permissao") )
+	                              inverseJoinColumns = @JoinColumn( name = "codigo_permissao") )
 	private List<Permissao> permissoes;
 
 	public List<Permissao> getPermissoes() {
@@ -71,9 +71,5 @@ public class Usuario {
 		Usuario other = (Usuario) obj;
 		return Objects.equals(codigo, other.codigo);
 	}
-	
-	
-	
-	
 	
 }

@@ -47,7 +47,7 @@ public class Lancamento {
 	@ManyToOne
 	@JoinColumn(name = "codigo_pessoa")
 	private Pessoa pessoa;
-	
+
 	public Long getCodigo() {
 		return codigo;
 	}

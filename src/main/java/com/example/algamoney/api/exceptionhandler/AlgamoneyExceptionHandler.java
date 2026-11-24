@@ -25,9 +25,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+/**
+ * captura o erro da apicação
+ * controller que observa toda a aplicação - não precisa chamar quando houver um erro
+ * captura toda as exceções específicas e trata da melhor forma
+ */
 @ControllerAdvice
 public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
-	
+	//Classe disponibilizada pelo Spring
 	@Autowired
 	private MessageSource messageSource;
 	
@@ -67,10 +72,11 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	/**
 	 * Validar argumentos de métodos que não são válidos
+	 * Bean Validator
 	 */
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
+			                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
 		List<Error> erros = criarListaErros(ex.getBindingResult());
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
 	}
@@ -87,18 +93,20 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 		return erros;
 	}
 	
+	//Tratamento para validar inconsistência na deleção de pessoa
 	//1º versao
-	//Tratamento de Excessão Customizado - apenas colcoando o @ExceptionHandler
+	//Tratamento de Excessão Customizado - apenas colocando o @ExceptionHandler
 	/*@ExceptionHandler({EmptyResultDataAccessException.class})
 	@ResponseStatus(code = HttpStatus.NOT_MODIFIED)
 	public void handlerEmptyResultDataAccessException(RuntimeException ex) {
 		
 	}*/
 	
+	//Tratamento para validar inconsistência na deleção de pessoa
 	//2º versao
 	//Tratamento de Excessão Customizado - apenas colcoando o @ExceptionHandler
 	@ExceptionHandler({EmptyResultDataAccessException.class})
-	//Se não quiser retornar nada - utilzar o response status
+	//Se não quiser retornar nada - utilizar o response status
 	//@ResponseStatus(code = HttpStatus.NOT_MODIFIED)
 	public ResponseEntity<Object> handlerEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request) {
 		String mensagemUsuario = this.messageSource.getMessage("recurso.nao-encontrado", null, LocaleContextHolder.getLocale());
@@ -111,7 +119,7 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 	
 	
-	//Tratamento para validar inconsitência de criar lançamento
+	//Tratamento para validar inconsistência de criar lançamento
 	@ExceptionHandler({DataIntegrityViolationException.class})
 	public ResponseEntity<Object> handlerDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
 		String mensagemUsuario = this.messageSource.getMessage("recurso.operacao-nao-permitida", null, LocaleContextHolder.getLocale());

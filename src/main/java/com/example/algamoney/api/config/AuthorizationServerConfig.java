@@ -27,6 +27,21 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import com.example.algamoney.api.config.token.CustomTokenEnhancer;
 
+/**
+ * 
+ * https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide
+ * 
+ * Aula 6.3 - Criando AccessToken
+ *  A versão 2.5.1.RELEASE do spring-security-oauth2 traz a anotação @EnableAuthorizationServer
+ *   como depreciada. Esta questão tem sido amplamente discutida na comunidade Spring desde 2019,
+ *    quando foi anunciada a descontinuidade da parte do projeto que tratava do Authorization Server.
+ *     Entretanto, devido à pressão de diversos desenvolvedores, em abril de 2020 a mantenedora do 
+ *     Spring decidiu iniciar a remodelagem desta importante ferramenta. Como ainda não há uma 
+ *     versão oficial adequada para produção, seguiremos utilizando a implementação já mostrada
+ *      para o Authorization Server, com algumas alterações em relação ao que foi mostrado no vídeo. 
+ * 
+ */
+
 @SuppressWarnings("deprecation")
 @Configuration
 @EnableAuthorizationServer
@@ -36,10 +51,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	
-	
 	//Removido quando buscado o usuario do banco de dados
-	//@Autowired
-	//private PasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	@Autowired
 	private UserDetailsService userDetailsService;
@@ -52,48 +66,47 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		clients.         // é o componente angular
 		    inMemory()   // Usuario está autorizando o cliente(aplicação) a acessar o Servidor de autorização e guardando em memória
 			.withClient("angular") // nome do cliente ( aplicação ) 
-			//.secret("@ngul@r0")  // senha do cliente
-			.secret("$2a$10$yHj5lMTr9vKbIURJIzwosOR6L1.xcM/FzqqqCAJbOL4m28MNnppYW")
-			.scopes("read", "write") // escopo para limitar a acesso desse cliente ao recurso
-			.authorizedGrantTypes("password", "refresh_token") // qual o tipo de grant type - password flow ( o cliente recebeu user/senha do usuário e 
-			                                  // enviar para pegar access token
-												// para conseguir configurar o refresh token, acrescentar ao grant_type refresh token
-			.accessTokenValiditySeconds(20) // qual o tempo de validacão do access token
-			.refreshTokenValiditySeconds(3600 * 24) //1 dia de duração
-			
+				.secret(passwordEncoder.encode("@ngul@r0"))  // senha do cliente
+				//.secret("$2a$10$tVK2HG2asFLcwQ.AFgBFA.P/s3mDglhN8V2Uh/OGt/D2gAZ6ON.FG")
+				.scopes("read", "write") // escopo para limitar a acesso desse cliente ao recurso
+				.authorizedGrantTypes("password", "refresh_token") // qual o tipo de grant type - password flow ( o cliente recebeu user/senha do usuário e 
+				                                  // enviar para pegar access token
+													// para conseguir configurar o refresh token, acrescentar ao grant_type refresh token
+				.accessTokenValiditySeconds(20) // qual o tempo de validacão do access token
+				.refreshTokenValiditySeconds(3600 * 24) //1 dia de duração
 		//inserido para visualizar a utilização de scope do jwt token
 		.and()
 			.withClient("mobile") // nome do cliente ( aplicação ) 
 			//.secret("wob$ile")  // senha do cliente
-			.secret( "$2a$10$bIXZ3V.5BjloqxClyQxjceXMKmTrHhSRpDq2XPzXwK9RXpqIDDQz2")
+			//.secret( "$2a$10$l6vkOv3E9JVsIfJjfOqJ9OfsVpwkFvcMIc2QtoAW9Odh3o9y7FaZy")
+			.secret(passwordEncoder.encode("wob$ile")) // Forma insegura
 			.scopes("read") // escopo para limitar a acesso desse cliente ao recurso
 			.authorizedGrantTypes("password", "refresh_token") // qual o tipo de grant type - password flow ( o cliente recebeu user/senha do usuário e 
 		                                  // enviar para pegar access token
 											// para conseguir configurar o refresh token, acrescentar ao grant_type refresh token
 			.accessTokenValiditySeconds(20) // qual o tempo de validacão do access token
-			.refreshTokenValiditySeconds(3600 * 24); //1 dia de duração
+			.refreshTokenValiditySeconds(3600 * 24); //1 dia de duração - ligado com a instrução no authorization
+		                                // reuseRefreshTokens se tiver pra true - essa duração será obedecida
 			
 	}
 	
+	//Armazenar o token na memória - tokenstore
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
 		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer(), accessTokenConverter()));
 		
 		endpoints
-		     .tokenStore(tokenStore()) // local onde vai armazenar o token
-		     //Removido pro utilizar o TokenEnhancer
-		     //.accessTokenConverter(accessTokenConverter())  // inserido para converter o JWT Token
-		     .tokenEnhancer(tokenEnhancerChain)
-		     .reuseRefreshTokens(false)  // configuração para que sempre que pedir, um novo refresh token será enviado(não reaproveitar)
-		     .authenticationManager(authenticationManager)  // para validar o token
-		     .userDetailsService(userDetailsService);
+			 .authenticationManager(authenticationManager)  // para validar o token
+		     //Removido por utilizar o TokenEnhancer
+		     .accessTokenConverter(accessTokenConverter())  // inserido para converter o JWT Token
+			 .tokenStore(tokenStore()) // local onde vai armazenar o token
+		     .userDetailsService(userDetailsService)
+		     //.tokenEnhancer(tokenEnhancerChain)
+		     .reuseRefreshTokens(false);  // configuração para que sempre que pedir, 
+		                                    //  um novo refresh token será enviado(não reaproveitar)
+		                            // Caso contrário, terá o valor da propriedade acima  refreshTokenValiditySeconds
 	}
-	
-	@Bean
-	public TokenEnhancer tokenEnhancer() {
-		return new CustomTokenEnhancer();
-	}	
 
 	// JWT Signature Verification
 	// chave que valida o jwt token
@@ -111,9 +124,15 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		return new JwtTokenStore(accessTokenConverter()); // Versão com access token JWT
 	}
 	
+	@Bean
+	public TokenEnhancer tokenEnhancer() {
+		return new CustomTokenEnhancer();
+	}	
+	
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-	    security.checkTokenAccess("permitAll()");
+	    security.tokenKeyAccess("permitAll()")
+        		.checkTokenAccess("isAuthenticated()");
 	}
 	
 }

@@ -46,8 +46,6 @@ public class LancamentoResource {
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	@Autowired
-	private LancamentoService service;
-	@Autowired
 	private MessageSource messageSource;
 	@Autowired
 	private LancamentoService lancamentoService;
@@ -72,6 +70,15 @@ public class LancamentoResource {
 		return this.repository.filtrar(lancamentoFilter, pageable);
 	}
 	
+	/**
+	 * @param lancamentoFilter
+	 * @param pageable
+	 * @return
+	 * 
+	 * Conceito de projeção
+	 * Se tiver um parâmetro resumo chama esse serviço
+	 * paginação não está funcionando
+	 */
 	@GetMapping(value = "/pesquisa/pag", params = "resumo")
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and hasAuthority('SCOPE_read')")
 	public Page<ResumoLancamento> pequisaResumidaComPaginacao(LancamentoFilter lancamentoFilter, Pageable pageable) {
@@ -89,11 +96,12 @@ public class LancamentoResource {
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and hasAuthority('SCOPE_write')")
 	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
 		  //Lancamento lancamentoSalvo = this.repository.save(lancamento);
-		  Lancamento lancamentoSalvo = this.service.salvar(lancamento);	
+		  Lancamento lancamentoSalvo = this.lancamentoService.salvar(lancamento);	
 		  this.publisher.publishEvent( new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo()));
 		  return ResponseEntity.status(HttpStatus.CREATED).body(lancamentoSalvo);
 	}
 	
+	//Criando uma Exception customizada
 	@ExceptionHandler({PessoaInexistenteOuInativaException.class})
 	public ResponseEntity<Object> handlePessoaInexistenteOuInativaException(PessoaInexistenteOuInativaException ex){
 		String mensagemUsuario = this.messageSource.getMessage("pessoa.inexistente-inativa", null, LocaleContextHolder.getLocale());

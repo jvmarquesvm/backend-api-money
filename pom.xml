@@ -17,6 +17,7 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+		<!--Vem com o hibernate validator-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -37,16 +38,21 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- org.springframework.context.NoSuchMessageException: No message found under code 'mensagem.invalida' for locale 'pt_BR'.-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 		
 		<!-- Configurações do Spring Propeties -->
+		<!-- Essa lib permite mapear os valores no application.properties e recuperar no código -->
+		<!-- - Configurar o ApiApplication
+			 - @EnableConfigurationProperties(value = AlgamoneyApiProperty.class)
+			 - Criar a classe AlgaMoneyApiApplication.properties  -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>false</optional>
+			<optional>true</optional>
 		</dependency>	
 
 		<!-- mysql 8-->
@@ -74,17 +80,21 @@
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-jpamodelgen -->
+		<!-- Necessário para fazer o jpa metamodel utilizado por Criteria na busca de lancamentos-->
+		<!-- Classes Stubs serão geradas na target ao rodar o maven install-->
 		<dependency>
 		    <groupId>org.hibernate</groupId>
 		    <artifactId>hibernate-jpamodelgen</artifactId>
-		</dependency> 
+		    <scope>provided</scope>
+		</dependency>
 		
 		<!-- Configurações do Spring Security -->
+		<!-- Basic -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-		
+		<!-- OAuth2-->
 		<dependency>
 		    <groupId>org.springframework.security.oauth</groupId>
 		    <artifactId>spring-security-oauth2</artifactId>
@@ -113,6 +123,7 @@
 		
 	</dependencies>
 
+	<!-- Plugin para rodar por linha de comando / gerar o jar / fazer o build -->
 	<build>
 		<plugins>
 			<plugin>

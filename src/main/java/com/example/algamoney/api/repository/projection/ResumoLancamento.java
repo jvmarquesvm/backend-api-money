@@ -5,6 +5,11 @@ import java.time.LocalDate;
 
 import com.example.algamoney.api.model.TipoLancamento;
 
+/**
+ * Projeções é uma forma de resumir o retorno de dados ao requisitor
+ * 
+ */
+
 public class ResumoLancamento {
 	private Long codigo;
 	private String descricao;

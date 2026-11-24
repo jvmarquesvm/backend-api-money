@@ -42,5 +42,4 @@ public class Permissao {
 		return Objects.equals(codigo, other.codigo);
 	}
 	
-	
 }

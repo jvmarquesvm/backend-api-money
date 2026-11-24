@@ -35,6 +35,8 @@ public class CategoriaResource {
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	
+	
+	//https://spring.io/guides/gs/rest-service-cors
 	@CrossOrigin(maxAge = 10, origins = {"http://127.0.0.1:5500"})
 	@GetMapping
 	//Scopo do usuario logado e scopo do client(aplicacao que está chamando este serviço)

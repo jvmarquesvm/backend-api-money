@@ -52,8 +52,10 @@ public class Pessoa {
 	public void setEndereco(Endereco endereco) {
 		this.endereco = endereco;
 	}
+	//Ignorar do Json impede do atributo ser preenchido na criação de Pessoa
+	//Aula 5.6
 	@Transient
-	@JsonIgnore
+	//@JsonIgnore
 	public boolean isAtivo() {
 		return !this.ativo;
 	}
@@ -73,8 +75,5 @@ public class Pessoa {
 		Pessoa other = (Pessoa) obj;
 		return Objects.equals(codigo, other.codigo);
 	}
-
-	
-	
 	
 }

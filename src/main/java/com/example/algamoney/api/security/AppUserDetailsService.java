@@ -30,13 +30,15 @@ public class AppUserDetailsService implements UserDetailsService {
 		Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
 		Usuario usuario = usuarioOptional.orElseThrow( () -> new UsernameNotFoundException("Usuario e/ou senha incorretos"));
 		//removido para colocar o nome do usuario do jwt token
-		//return new User(email, usuario.getSenha(), getPermissoes(usuario));
-		return new UsuarioSistema(usuario, getPermissoes(usuario));
+		return new User(email, usuario.getSenha(), getPermissoes(usuario));
+		//return new UsuarioSistema(usuario, getPermissoes(usuario));
 	}
 
 	private Collection<? extends GrantedAuthority> getPermissoes(Usuario usuario) {
 		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-		usuario.getPermissoes().forEach( permissao -> authorities.add(new SimpleGrantedAuthority(permissao.getDescricao().toUpperCase())));
+		usuario.getPermissoes().forEach( permissao -> 
+		                       authorities.add(new SimpleGrantedAuthority(permissao.getDescricao().toUpperCase()))
+		);
 		return authorities;
 	}
 
